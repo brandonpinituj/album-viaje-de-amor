@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Un viaje de amor</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600&family=Poppins:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --rosa: #e91e63;
+      --rosa-oscuro: #c2185b;
+      --texto: #4a2c3a;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(160deg, #fff0f5 0%, #ffe4ec 45%, #fff5f7 100%);
+      min-height: 100vh;
+      color: var(--texto);
+      padding: 24px 16px 70px;
+    }
+    header { text-align: center; margin-bottom: 36px; }
+    h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.5rem;
+      font-weight: 600;
+      color: var(--rosa-oscuro);
+      margin-bottom: 6px;
+    }
+    .subtitle { font-weight: 300; color: #8b5a6b; font-size: 1.1rem; }
+    .hearts { font-size: 1.4rem; margin-bottom: 8px; opacity: 0.85; }
+    .upload-box {
+      background: white;
+      max-width: 420px;
+      margin: 0 auto 40px;
+      padding: 26px 24px;
+      border-radius: 22px;
+      box-shadow: 0 12px 35px rgba(233, 30, 99, 0.12);
+      text-align: center;
+    }
+    input[type="file"] { display: none; }
+    .btn {
+      background: var(--rosa);
+      color: white;
+      border: none;
+      padding: 15px 32px;
+      border-radius: 50px;
+      font-size: 1.05rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn:hover { background: var(--rosa-oscuro); transform: translateY(-2px); }
+    .btn:disabled { background: #f8bbd9; cursor: not-allowed; transform: none; }
+    #status { margin-top: 14px; font-size: 0.95rem; min-height: 24px; font-weight: 500; }
+
+    /* Modal lugar */
+    #modalLugar {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 2000;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    #modalLugar.show { display: flex; }
+    .modal-content {
+      background: white;
+      padding: 28px 24px;
+      border-radius: 20px;
+      width: 100%;
+      max-width: 360px;
+      text-align: center;
+    }
+    .modal-content h3 {
+      font-family: 'Playfair Display', serif;
+      color: var(--rosa-oscuro);
+      margin-bottom: 16px;
+      font-size: 1.4rem;
+    }
+    #inputLugar {
+      width: 100%;
+      padding: 13px 16px;
+      border: 2px solid #f8bbd9;
+      border-radius: 50px;
+      font-size: 1rem;
+      outline: none;
+      text-align: center;
+      margin-bottom: 18px;
+    }
+    #inputLugar:focus { border-color: var(--rosa); }
+    .modal-btns { display: flex; gap: 12px; justify-content: center; }
+    .btn-cancel {
+      background: #eee;
+      color: #666;
+    }
+
+    #preview {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(165px, 1fr));
+      gap: 18px;
+      max-width: 1050px;
+      margin: 0 auto;
+    }
+    .photo-card {
+      position: relative;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 8px 22px rgba(0,0,0,0.1);
+      background: white;
+      cursor: pointer;
+      transition: transform 0.25s;
+    }
+    .photo-card:hover { transform: translateY(-5px); }
+    .photo-card img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+      display: block;
+    }
+    .photo-info {
+      padding: 10px 12px 12px;
+      text-align: center;
+      font-size: 0.9rem;
+      color: #6b3a4a;
+      font-weight: 500;
+      background: white;
+    }
+    .delete-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: rgba(0,0,0,0.55);
+      color: white;
+      border: none;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      font-size: 1.2rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+    }
+    .delete-btn:hover { background: #e91e63; }
+    .empty {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 70px 20px;
+      color: #a07a8a;
+      font-size: 1.15rem;
+      line-height: 1.5;
+    }
+    #lightbox {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.93);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    #lightbox.show { display: flex; }
+    #lightbox img {
+      max-width: 100%;
+      max-height: 90vh;
+      border-radius: 14px;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.5);
+    }
+    #lightboxClose {
+      position: absolute;
+      top: 18px;
+      right: 24px;
+      background: none;
+      border: none;
+      color: white;
+      font-size: 2.6rem;
+      cursor: pointer;
+      line-height: 1;
+    }
+    @media (max-width: 500px) {
+      h1 { font-size: 2rem; }
+      #preview { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+      .photo-card img { height: 150px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="hearts"></div>
+    <h1>Un viaje de amor</h1>
+    <p class="subtitle">Nuestras fotos de viajes y salidas</p>
+  </header>
+
+  <div class="upload-box">
+    <label class="btn" id="btnLabel">
+      Subir foto
+      <input type="file" id="fileInput" accept="image/*" capture="environment">
+    </label>
+    <div id="status"></div>
+  </div>
+
+  <div id="preview">
+    <div class="empty">Cargando nuestras fotos...</div>
+  </div>
+
+  <!-- Modal para el lugar -->
+  <div id="modalLugar">
+    <div class="modal-content">
+      <h3>¿Dónde fue esta foto?</h3>
+      <input type="text" id="inputLugar" placeholder="Ej: Cancún, Parque, Casa..." maxlength="40">
+      <div class="modal-btns">
+        <button class="btn btn-cancel" onclick="cancelarSubida()">Cancelar</button>
+        <button class="btn" onclick="confirmarSubida()">Subir</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="lightbox" onclick="cerrarLightbox()">
+    <button id="lightboxClose">&times;</button>
+    <img id="lightboxImg" src="" alt="Foto ampliada">
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const supabaseUrl = "https://dummqfcymsyvopktgyqu.supabase.co";
+    const supabaseKey = "sb_publishable_51lhdrJqsmEhCih3yqbqmw_dvxFkjjU";
+    const BUCKET = "FOTOS";
+
+    const client = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+    const preview = document.getElementById("preview");
+    const status = document.getElementById("status");
+    const fileInput = document.getElementById("fileInput");
+    const btnLabel = document.getElementById("btnLabel");
+    const modalLugar = document.getElementById("modalLugar");
+    const inputLugar = document.getElementById("inputLugar");
+
+    let archivoPendiente = null;
+
+    // Cuando eligen una foto
+    fileInput.addEventListener("change", function () {
+      const file = this.files[0];
+      if (!file) return;
+
+      if (!file.type.startsWith("image/")) {
+        status.textContent = "Solo se permiten imágenes";
+        status.style.color = "#e91e63";
+        return;
+      }
+
+      archivoPendiente = file;
+      inputLugar.value = "";
+      modalLugar.classList.add("show");
+      inputLugar.focus();
+    });
+
+    function cancelarSubida() {
+      modalLugar.classList.remove("show");
+      archivoPendiente = null;
+      fileInput.value = "";
+    }
+
+    async function confirmarSubida() {
+      if (!archivoPendiente) return;
+
+      const lugar = inputLugar.value.trim() || "Sin lugar";
+      modalLugar.classList.remove("show");
+
+      status.textContent = "Subiendo foto...";
+      status.style.color = "#666";
+      btnLabel.style.opacity = "0.6";
+      fileInput.disabled = true;
+
+      const fileName = `${Date.now()}-${archivoPendiente.name.replace(/[^a-zA-Z0-9.-]/g, "_")}`;
+
+      const { error } = await client.storage
+        .from(BUCKET)
+        .upload(fileName, archivoPendiente, {
+          cacheControl: "3600",
+          upsert: false,
+          metadata: { lugar: lugar }
+        });
+
+      if (error) {
+        console.error(error);
+        status.textContent = "Error: " + error.message;
+        status.style.color = "#e91e63";
+      } else {
+        status.textContent = "¡Foto subida con éxito!";
+        status.style.color = "#2e7d32";
+        setTimeout(mostrarFotos, 900);
+      }
+
+      archivoPendiente = null;
+      fileInput.value = "";
+      fileInput.disabled = false;
+      btnLabel.style.opacity = "1";
+    }
+
+    // Enter para confirmar
+    inputLugar.addEventListener("keypress", function(e) {
+      if (e.key === "Enter") confirmarSubida();
+    });
+
+    async function eliminarFoto(nombre, event) {
+      event.stopPropagation();
+      if (!confirm("¿Seguro que quieres eliminar esta foto?")) return;
+
+      const { error } = await client.storage.from(BUCKET).remove([nombre]);
+
+      if (error) {
+        alert("Error al eliminar: " + error.message);
+      } else {
+        mostrarFotos();
+      }
+    }
+
+    async function mostrarFotos() {
+      preview.innerHTML = '<div class="empty">Cargando nuestras fotos...</div>';
+
+      const { data, error } = await client.storage
+        .from(BUCKET)
+        .list("", { limit: 200, sortBy: { column: "created_at", order: "desc" } });
+
+      if (error) {
+        preview.innerHTML = `<div class="empty">Error al cargar: ${error.message}</div>`;
+        return;
+      }
+
+      const archivos = (data || []).filter(item => item.id !== null);
+
+      if (archivos.length === 0) {
+        preview.innerHTML = '<div class="empty">Aún no hay fotos.<br>¡Sube la primera!</div>';
+        return;
+      }
+
+      preview.innerHTML = "";
+
+      for (const foto of archivos) {
+        const { data: urlData } = client.storage.from(BUCKET).getPublicUrl(foto.name);
+
+        // Obtener el lugar desde metadata
+        const lugar = (foto.metadata && foto.metadata.lugar) ? foto.metadata.lugar : "Sin lugar";
+
+        const card = document.createElement("div");
+        card.className = "photo-card";
+        card.onclick = () => abrirLightbox(urlData.publicUrl);
+
+        const img = document.createElement("img");
+        img.src = urlData.publicUrl;
+        img.alt = lugar;
+        img.loading = "lazy";
+
+        const info = document.createElement("div");
+        info.className = "photo-info";
+        info.textContent = lugar;
+
+        const delBtn = document.createElement("button");
+        delBtn.className = "delete-btn";
+        delBtn.innerHTML = "×";
+        delBtn.title = "Eliminar";
+        delBtn.onclick = (e) => eliminarFoto(foto.name, e);
+
+        card.appendChild(img);
+        card.appendChild(info);
+        card.appendChild(delBtn);
+        preview.appendChild(card);
+      }
+    }
+
+    function abrirLightbox(url) {
+      document.getElementById("lightboxImg").src = url;
+      document.getElementById("lightbox").classList.add("show");
+    }
+
+    function cerrarLightbox() {
+      document.getElementById("lightbox").classList.remove("show");
+    }
+
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape") {
+        cerrarLightbox();
+        cancelarSubida();
+      }
+    });
+
+    mostrarFotos();
+  </script>
+</body>
+</html>
