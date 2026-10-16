@@ -52,7 +52,7 @@
     }
     .photo-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr); /* siempre 3 columnas */
+      grid-template-columns: repeat(3, 1fr);
       gap: 15px;
     }
     .photo-card {
@@ -67,19 +67,6 @@
       height: 180px;
       object-fit: cover;
     }
-    .delete-btn {
-      position: absolute;
-      top: 8px;
-      right: 8px;
-      background: rgba(233,30,99,0.8);
-      color: white;
-      border: none;
-      border-radius: 6px;
-      padding: 4px 8px;
-      cursor: pointer;
-      font-size: 0.8rem;
-    }
-    .delete-btn:hover { background: #c2185b; }
     @keyframes aparecer {
       from { opacity: 0; transform: scale(0.9); }
       to { opacity: 1; transform: scale(1); }
@@ -155,12 +142,16 @@
       status.style.color = "#666";
 
       for (const file of files) {
-        // Guardamos la fecha en el nombre del archivo
-        const fechaStr = fechaElegida.toISOString().split("T")[0]; // YYYY-MM-DD
+        const fechaStr = fechaElegida.toISOString().split("T")[0];
         const fileName = `${fechaStr}-${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, "_")}`;
         const { error } = await client.storage.from(BUCKET).upload(fileName, file);
-        if (error) {
-          console.error("Error al subir:", error.message);
+        if (!error) {
+          const { data: urlData } = client.storage.from(BUCKET).getPublicUrl(fileName);
+          // Guardar URL y fecha en la tabla
+          await client.from("album").insert({
+            url: urlData.publicUrl,
+            fecha: fechaStr
+          });
         }
       }
 
@@ -174,41 +165,18 @@
 
     async function mostrarFotos() {
       preview.innerHTML = "";
-      const { data, error } = await client.storage.from(BUCKET).list("", { limit: 200 });
+      const { data, error } = await client.from("album").select("url, fecha").order("id", { ascending: false });
       if (error) {
         preview.innerHTML = "<p>Error al cargar fotos.</p>";
         return;
       }
 
-      const archivosValidos = (data || []).filter(item => item.name !== ".emptyFolderPlaceholder");
-
       const gruposPorMes = {};
-      for (const foto of archivosValidos) {
-        // Extraemos la fecha del nombre del archivo
-        const partes = foto.name.split("-");
-        let fecha = new Date(foto.created_at);
-        if (partes[0].match(/^\d{4}-\d{2}-\d{2}$/)) {
-          fecha = new Date(partes[0]);
-        }
+      for (const foto of data) {
+        const fecha = new Date(foto.fecha);
         const mes = fecha.toLocaleString("es-ES", { month: "long", year: "numeric" });
         if (!gruposPorMes[mes]) gruposPorMes[mes] = [];
-        gruposPorMes[mes].push({ ...foto, fecha });
+        gruposPorMes[mes].push(foto);
       }
 
       for (const mes in gruposPorMes) {
-        const grupoDiv = document.createElement("div");
-        grupoDiv.className = "mes-grupo";
-        grupoDiv.innerHTML = `<div class="mes-titulo">📅 ${mes}</div>`;
-
-        const grid = document.createElement("div");
-        grid.className = "photo-grid";
-
-        for (const foto of gruposPorMes[mes]) {
-          const { data: urlData } = client.storage.from(BUCKET).getPublicUrl(foto.name);
-          const card = document.createElement("div");
-          card.className = "photo-card";
-          card.innerHTML = `
-            <img src="${urlData.publicUrl}" alt="Foto">
-            <button class="delete-btn" onclick="eliminarFoto('${foto.name}')">🗑️</button>
-          `;
-          grid.appendChild(card
