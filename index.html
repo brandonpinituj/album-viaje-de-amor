@@ -11,9 +11,7 @@
       margin: 0;
       padding: 20px;
     }
-    h1 {
-      color: #c2185b;
-    }
+    h1 { color: #c2185b; }
     #contador {
       font-size: 1.2rem;
       color: #c2185b;
@@ -37,12 +35,8 @@
       font-weight: 500;
       transition: 0.3s;
     }
-    .btn:hover {
-      background: #c2185b;
-    }
-    .mes-grupo {
-      margin-top: 40px;
-    }
+    .btn:hover { background: #c2185b; }
+    .mes-grupo { margin-top: 40px; }
     .mes-titulo {
       font-size: 1.3rem;
       color: #c2185b;
@@ -85,9 +79,7 @@
       cursor: pointer;
       font-size: 0.8rem;
     }
-    .delete-btn:hover {
-      background: #c2185b;
-    }
+    .delete-btn:hover { background: #c2185b; }
     @keyframes aparecer {
       from { opacity: 0; transform: scale(0.9); }
       to { opacity: 1; transform: scale(1); }
@@ -112,6 +104,7 @@
 
   <div class="upload-box">
     <input type="file" id="fileInput" accept="image/*">
+    <input type="date" id="dateInput">
     <button class="btn" id="uploadBtn">Subir foto</button>
     <div id="status"></div>
   </div>
@@ -120,7 +113,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    // 💞 Contador automático de días y meses
+    // 💞 Contador automático
     const fechaInicio = new Date("2026-05-16");
     const hoy = new Date();
     const dias = Math.floor((hoy - fechaInicio) / (1000 * 60 * 60 * 24));
@@ -137,19 +130,21 @@
       setTimeout(() => c.remove(), 6000);
     }, 800);
 
-    // 🔗 Conexión Supabase
+    // 🔗 Supabase
     const supabaseUrl = "https://dummqfcymsyvopktgyqu.supabase.co";
     const supabaseKey = "sb_publishable_51lhdrJqsmEhCih3yqbqmw_dvxFkjjU";
     const BUCKET = "FOTOS";
     const client = window.supabase.createClient(supabaseUrl, supabaseKey);
 
     const fileInput = document.getElementById("fileInput");
+    const dateInput = document.getElementById("dateInput");
     const uploadBtn = document.getElementById("uploadBtn");
     const status = document.getElementById("status");
     const preview = document.getElementById("preview");
 
     uploadBtn.addEventListener("click", async () => {
       const file = fileInput.files[0];
+      const fechaElegida = dateInput.value ? new Date(dateInput.value) : new Date();
       if (!file) {
         status.textContent = "Selecciona una foto primero 💡";
         status.style.color = "#e91e63";
@@ -160,7 +155,9 @@
       status.style.color = "#666";
 
       const fileName = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, "_")}`;
-      const { error } = await client.storage.from(BUCKET).upload(fileName, file);
+      const { error } = await client.storage.from(BUCKET).upload(fileName, file, {
+        metadata: { fecha: fechaElegida.toISOString() }
+      });
 
       if (error) {
         status.textContent = "Error al subir: " + error.message;
@@ -172,6 +169,7 @@
       }
 
       fileInput.value = "";
+      dateInput.value = "";
     });
 
     async function mostrarFotos() {
@@ -182,19 +180,16 @@
         return;
       }
 
-      // Ignorar archivos vacíos o de sistema
       const archivosValidos = (data || []).filter(item => item.name !== ".emptyFolderPlaceholder");
 
-      // Agrupar fotos por mes
       const gruposPorMes = {};
       for (const foto of archivosValidos) {
-        const fecha = new Date(foto.created_at);
+        const fecha = foto.metadata?.fecha ? new Date(foto.metadata.fecha) : new Date(foto.created_at);
         const mes = fecha.toLocaleString("es-ES", { month: "long", year: "numeric" });
         if (!gruposPorMes[mes]) gruposPorMes[mes] = [];
-        gruposPorMes[mes].push(foto);
+        gruposPorMes[mes].push({ ...foto, fecha });
       }
 
-      // Mostrar grupos
       for (const mes in gruposPorMes) {
         const grupoDiv = document.createElement("div");
         grupoDiv.className = "mes-grupo";
@@ -221,16 +216,4 @@
 
     async function eliminarFoto(nombre) {
       if (confirm("¿Seguro que quieres eliminar esta foto?")) {
-        const { error } = await client.storage.from(BUCKET).remove([nombre]);
-        if (error) {
-          alert("Error al eliminar: " + error.message);
-        } else {
-          mostrarFotos();
-        }
-      }
-    }
-
-    mostrarFotos();
-  </script>
-</body>
-</html>
+        const { error } = await client.storage.from(BUCKET
