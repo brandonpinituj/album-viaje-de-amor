@@ -2,46 +2,68 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Álbum Romántico</title>
+  <title>Un viaje de amor</title>
   <style>
     body {
-      font-family: 'Arial', sans-serif;
+      font-family: 'Poppins', sans-serif;
       background: linear-gradient(to bottom, #fff0f5, #ffe4e1);
+      text-align: center;
       margin: 0;
       padding: 20px;
-      text-align: center;
     }
-    header {
-      font-size: 1.8rem;
+    h1 {
       color: #c2185b;
-      margin-bottom: 20px;
     }
     #contador {
       font-size: 1.2rem;
       color: #c2185b;
       margin-bottom: 20px;
     }
-    #fileInput {
-      margin: 20px 0;
+    .upload-box {
+      background: white;
+      max-width: 420px;
+      margin: 0 auto 20px;
+      padding: 20px;
+      border-radius: 20px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
     }
-    .gallery {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
+    .btn {
+      background: #e91e63;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 50px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: 0.3s;
+    }
+    .btn:hover {
+      background: #c2185b;
+    }
+    #preview {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
       gap: 15px;
+      max-width: 900px;
+      margin: 0 auto;
     }
     .photo-card {
-      width: 200px;
-      height: 200px;
-      border-radius: 10px;
+      position: relative;
+      border-radius: 12px;
       overflow: hidden;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
       animation: aparecer 0.5s ease;
     }
     .photo-card img {
       width: 100%;
-      height: 100%;
+      height: 180px;
       object-fit: cover;
+    }
+    .photo-info {
+      padding: 8px;
+      font-size: 0.9rem;
+      color: #6b3a4a;
+      background: white;
     }
     @keyframes aparecer {
       from { opacity: 0; transform: scale(0.9); }
@@ -62,36 +84,25 @@
   </style>
 </head>
 <body>
-  <header>💖 Nuestro Álbum Romántico 💖</header>
+  <h1>💖 Un viaje de amor 💖</h1>
   <div id="contador"></div>
 
-  <input type="file" id="fileInput" accept="image/*" multiple>
-  <div class="gallery" id="gallery"></div>
+  <div class="upload-box">
+    <input type="file" id="fileInput" accept="image/*">
+    <button class="btn" id="uploadBtn">Subir foto</button>
+    <div id="status"></div>
+  </div>
 
+  <div id="preview"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    // 💞 Contador automático de días desde su aniversario
-    const fechaInicio = new Date("2026-05-16"); // cambia si fue otra fecha
+    // 💞 Contador automático de días y meses
+    const fechaInicio = new Date("2026-05-16");
     const hoy = new Date();
-    const diasJuntos = Math.floor((hoy - fechaInicio) / (1000 * 60 * 60 * 24));
-    document.getElementById("contador").textContent = `Hoy cumplimos ${diasJuntos} días juntos 💞`;
-
-    // 📸 Subida de fotos desde la galería
-    const fileInput = document.getElementById("fileInput");
-    const gallery = document.getElementById("gallery");
-
-    fileInput.addEventListener("change", (event) => {
-      const files = event.target.files;
-      for (const file of files) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          const photoCard = document.createElement("div");
-          photoCard.className = "photo-card";
-          photoCard.innerHTML = `<img src="${e.target.result}" alt="Foto">`;
-          gallery.appendChild(photoCard);
-        };
-        reader.readAsDataURL(file);
-      }
-    });
+    const dias = Math.floor((hoy - fechaInicio) / (1000 * 60 * 60 * 24));
+    const meses = Math.floor(dias / 30.44);
+    document.getElementById("contador").textContent = `Hoy cumplimos ${dias} días y ${meses} meses juntos 💞`;
 
     // 💗 Corazones flotando
     setInterval(() => {
@@ -102,6 +113,12 @@
       document.body.appendChild(c);
       setTimeout(() => c.remove(), 6000);
     }, 800);
-  </script>
-</body>
-</html>
+
+    // 🔗 Conexión Supabase
+    const supabaseUrl = "https://dummqfcymsyvopktgyqu.supabase.co";
+    const supabaseKey = "sb_publishable_51lhdrJqsmEhCih3yqbqmw_dvxFkjjU";
+    const BUCKET = "FOTOS";
+    const client = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+    const fileInput = document.getElementById("fileInput");
+    const uploadBtn = document.get
