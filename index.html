@@ -121,4 +121,57 @@
     const client = window.supabase.createClient(supabaseUrl, supabaseKey);
 
     const fileInput = document.getElementById("fileInput");
-    const uploadBtn = document.get
+    const uploadBtn = document.getElementById("uploadBtn");
+    const status = document.getElementById("status");
+    const preview = document.getElementById("preview");
+
+    uploadBtn.addEventListener("click", async () => {
+      const file = fileInput.files[0];
+      if (!file) {
+        status.textContent = "Selecciona una foto primero 💡";
+        status.style.color = "#e91e63";
+        return;
+      }
+
+      status.textContent = "Subiendo foto...";
+      status.style.color = "#666";
+
+      const fileName = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, "_")}`;
+      const { error } = await client.storage.from(BUCKET).upload(fileName, file);
+
+      if (error) {
+        status.textContent = "Error al subir: " + error.message;
+        status.style.color = "#e91e63";
+      } else {
+        status.textContent = "Foto subida con éxito 💖";
+        status.style.color = "#2e7d32";
+        mostrarFotos();
+      }
+
+      fileInput.value = "";
+    });
+
+    async function mostrarFotos() {
+      preview.innerHTML = "";
+      const { data, error } = await client.storage.from(BUCKET).list("", { limit: 200 });
+      if (error) {
+        preview.innerHTML = "<p>Error al cargar fotos.</p>";
+        return;
+      }
+
+      for (const foto of data) {
+        const { data: urlData } = client.storage.from(BUCKET).getPublicUrl(foto.name);
+        const card = document.createElement("div");
+        card.className = "photo-card";
+        card.innerHTML = `
+          <img src="${urlData.publicUrl}" alt="Foto">
+          <div class="photo-info">${foto.name}</div>
+        `;
+        preview.appendChild(card);
+      }
+    }
+
+    mostrarFotos();
+  </script>
+</body>
+</html>
