@@ -103,9 +103,9 @@
   <div id="contador"></div>
 
   <div class="upload-box">
-    <input type="file" id="fileInput" accept="image/*">
+    <input type="file" id="fileInput" accept="image/*" multiple>
     <input type="date" id="dateInput">
-    <button class="btn" id="uploadBtn">Subir foto</button>
+    <button class="btn" id="uploadBtn">Subir fotos</button>
     <div id="status"></div>
   </div>
 
@@ -143,30 +143,27 @@
     const preview = document.getElementById("preview");
 
     uploadBtn.addEventListener("click", async () => {
-      const file = fileInput.files[0];
+      const files = fileInput.files;
       const fechaElegida = dateInput.value ? new Date(dateInput.value) : new Date();
-      if (!file) {
-        status.textContent = "Selecciona una foto primero 💡";
+      if (!files.length) {
+        status.textContent = "Selecciona al menos una foto 💡";
         status.style.color = "#e91e63";
         return;
       }
 
-      status.textContent = "Subiendo foto...";
+      status.textContent = "Subiendo fotos...";
       status.style.color = "#666";
 
-      const fileName = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, "_")}`;
-      const { error } = await client.storage.from(BUCKET).upload(fileName, file, {
-        metadata: { fecha: fechaElegida.toISOString() }
-      });
-
-      if (error) {
-        status.textContent = "Error al subir: " + error.message;
-        status.style.color = "#e91e63";
-      } else {
-        status.textContent = "Foto subida con éxito 💖";
-        status.style.color = "#2e7d32";
-        mostrarFotos();
+      for (const file of files) {
+        const fileName = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, "_")}`;
+        await client.storage.from(BUCKET).upload(fileName, file, {
+          metadata: { fecha: fechaElegida.toISOString() }
+        });
       }
+
+      status.textContent = "Fotos subidas con éxito 💖";
+      status.style.color = "#2e7d32";
+      mostrarFotos();
 
       fileInput.value = "";
       dateInput.value = "";
@@ -216,4 +213,12 @@
 
     async function eliminarFoto(nombre) {
       if (confirm("¿Seguro que quieres eliminar esta foto?")) {
-        const { error } = await client.storage.from(BUCKET
+        await client.storage.from(BUCKET).remove([nombre]);
+        mostrarFotos();
+      }
+    }
+
+    mostrarFotos();
+  </script>
+</body>
+</html>
