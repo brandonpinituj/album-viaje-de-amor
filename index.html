@@ -4,85 +4,14 @@
   <meta charset="UTF-8">
   <title>Un viaje de amor</title>
   <style>
-    body {
-      font-family: 'Poppins', sans-serif;
-      background: linear-gradient(to bottom, #fff0f5, #ffe4e1);
-      text-align: center;
-      margin: 0;
-      padding: 20px;
-    }
+    body { font-family: 'Poppins', sans-serif; background: #fff0f5; text-align: center; }
     h1 { color: #c2185b; }
-    #contador {
-      font-size: 1.2rem;
-      color: #c2185b;
-      margin-bottom: 20px;
-    }
-    .upload-box {
-      background: white;
-      max-width: 420px;
-      margin: 0 auto 20px;
-      padding: 20px;
-      border-radius: 20px;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-    }
-    .btn {
-      background: #e91e63;
-      color: white;
-      border: none;
-      padding: 12px 24px;
-      border-radius: 50px;
-      cursor: pointer;
-      font-weight: 500;
-      transition: 0.3s;
-    }
+    #contador { margin-bottom: 20px; color: #c2185b; }
+    .upload-box { background: white; padding: 20px; border-radius: 12px; margin: 0 auto 20px; max-width: 400px; }
+    .btn { background: #e91e63; color: white; border: none; padding: 10px 20px; border-radius: 20px; cursor: pointer; }
     .btn:hover { background: #c2185b; }
-    .mes-grupo { margin-top: 40px; }
-    .mes-titulo {
-      font-size: 1.3rem;
-      color: #c2185b;
-      margin-bottom: 15px;
-    }
-    #preview {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 30px;
-      max-width: 900px;
-      margin: 0 auto;
-    }
-    .photo-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 15px;
-    }
-    .photo-card {
-      position: relative;
-      border-radius: 12px;
-      overflow: hidden;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-      animation: aparecer 0.5s ease;
-    }
-    .photo-card img {
-      width: 100%;
-      height: 180px;
-      object-fit: cover;
-    }
-    @keyframes aparecer {
-      from { opacity: 0; transform: scale(0.9); }
-      to { opacity: 1; transform: scale(1); }
-    }
-    @keyframes flotar {
-      0% { transform: translateY(0); opacity: 1; }
-      100% { transform: translateY(-100vh); opacity: 0; }
-    }
-    .corazon {
-      position: fixed;
-      bottom: 0;
-      font-size: 1.5rem;
-      color: #e91e63;
-      animation: flotar 6s linear;
-      pointer-events: none;
-    }
+    .photo-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; }
+    .photo-card img { width: 100%; height: 150px; object-fit: cover; border-radius: 8px; }
   </style>
 </head>
 <body>
@@ -100,18 +29,101 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    // 💞 Contador automático
+    // Contador de días y meses juntos
     const fechaInicio = new Date("2026-05-16");
     const hoy = new Date();
-    const dias = Math.floor((hoy - fechaInicio) / (1000 * 60 * 60 * 24));
+    const dias = Math.floor((hoy - fechaInicio) / (1000*60*60*24));
     const meses = Math.floor(dias / 30.44);
-    document.getElementById("contador").textContent = `Hoy cumplimos ${dias} días ${meses} meses juntos 💞`;
+    document.getElementById("contador").textContent = `Hoy cumplimos ${dias} días y ${meses} meses juntos 💞`;
 
-    // 💗 Corazones flotando
-    setInterval(() => {
-      const c = document.createElement("div");
-      c.className = "corazon";
-      c.textContent = "💗";
-      c.style.left = Math.random() * 100 + "vw";
-      document.body.appendChild(c);
-      setTimeout(() => c.remove(),
+    // Conexión a Supabase
+    const supabaseUrl = "https://dummqfcymsyvopktgyqu.supabase.co";
+    const supabaseKey = "sb_publishable_51lhdrJqsmEhCih3yqbqmw_dvxFkjjU";
+    const client = window.supabase.createClient(supabaseUrl, supabaseKey);
+    const BUCKET = "FOTOS";
+
+    const fileInput = document.getElementById("fileInput");
+    const dateInput = document.getElementById("dateInput");
+    const uploadBtn = document.getElementById("uploadBtn");
+    const status = document.getElementById("status");
+    const preview = document.getElementById("preview");
+
+    uploadBtn.addEventListener("click", async () => {
+      const files = fileInput.files;
+      const fechaElegida = dateInput.value ? new Date(dateInput.value) : new Date();
+      if (!files.length) {
+        status.textContent = "Selecciona al menos una foto 💡";
+        return;
+      }
+      status.textContent = "Subiendo fotos...";
+
+      for (const file of files) {
+        const fechaStr = fechaElegida.toISOString().split("T")[0];
+        const fileName = `${fechaStr}-${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g,"_")}`;
+
+        // Subir al bucket
+        const { error: uploadError } = await client.storage.from(BUCKET).upload(fileName, file);
+        if (uploadError) {
+          console.error("Error al subir archivo:", uploadError.message);
+          status.textContent = "Error al subir archivo. Revisa consola.";
+          return;
+        }
+
+        // Obtener URL pública
+        const { data: urlData } = client.storage.from(BUCKET).getPublicUrl(fileName);
+
+        // Guardar en tabla album
+        const { error: insertError } = await client.from("album").insert({
+          url: urlData.publicUrl,
+          fecha: fechaStr
+        });
+        if (insertError) {
+          console.error("Error al guardar en tabla:", insertError.message);
+          status.textContent = "Error al guardar en tabla. Revisa consola.";
+          return;
+        }
+      }
+
+      status.textContent = "Fotos subidas con éxito 💖";
+      mostrarFotos();
+      fileInput.value = "";
+      dateInput.value = "";
+    });
+
+    async function mostrarFotos() {
+      preview.innerHTML = "";
+      const { data, error } = await client.from("album").select("url, fecha").order("id",{ascending:false});
+      if (error) {
+        console.error("Error al leer tabla:", error.message);
+        preview.innerHTML = "<p>Error al cargar fotos.</p>";
+        return;
+      }
+
+      const gruposPorMes = {};
+      for (const foto of data) {
+        const fecha = new Date(foto.fecha);
+        const mes = fecha.toLocaleString("es-ES",{month:"long",year:"numeric"});
+        if (!gruposPorMes[mes]) gruposPorMes[mes] = [];
+        gruposPorMes[mes].push(foto);
+      }
+
+      for (const mes in gruposPorMes) {
+        const grupoDiv = document.createElement("div");
+        grupoDiv.innerHTML = `<h3>📅 ${mes}</h3>`;
+        const grid = document.createElement("div");
+        grid.className = "photo-grid";
+        for (const foto of gruposPorMes[mes]) {
+          const card = document.createElement("div");
+          card.className = "photo-card";
+          card.innerHTML = `<img src="${foto.url}" alt="Foto">`;
+          grid.appendChild(card);
+        }
+        grupoDiv.appendChild(grid);
+        preview.appendChild(grupoDiv);
+      }
+    }
+
+    mostrarFotos();
+  </script>
+</body>
+</html>
