@@ -155,10 +155,13 @@
       status.style.color = "#666";
 
       for (const file of files) {
-        const fileName = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, "_")}`;
-        await client.storage.from(BUCKET).upload(fileName, file, {
-          metadata: { fecha: fechaElegida.toISOString() }
-        });
+        // Guardamos la fecha en el nombre del archivo
+        const fechaStr = fechaElegida.toISOString().split("T")[0]; // YYYY-MM-DD
+        const fileName = `${fechaStr}-${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, "_")}`;
+        const { error } = await client.storage.from(BUCKET).upload(fileName, file);
+        if (error) {
+          console.error("Error al subir:", error.message);
+        }
       }
 
       status.textContent = "Fotos subidas con éxito 💖";
@@ -181,8 +184,12 @@
 
       const gruposPorMes = {};
       for (const foto of archivosValidos) {
-        // ⚠️ Supabase list() no devuelve metadata, así que usamos created_at como respaldo
-        const fecha = foto.metadata?.fecha ? new Date(foto.metadata.fecha) : new Date(foto.created_at);
+        // Extraemos la fecha del nombre del archivo
+        const partes = foto.name.split("-");
+        let fecha = new Date(foto.created_at);
+        if (partes[0].match(/^\d{4}-\d{2}-\d{2}$/)) {
+          fecha = new Date(partes[0]);
+        }
         const mes = fecha.toLocaleString("es-ES", { month: "long", year: "numeric" });
         if (!gruposPorMes[mes]) gruposPorMes[mes] = [];
         gruposPorMes[mes].push({ ...foto, fecha });
@@ -204,13 +211,4 @@
             <img src="${urlData.publicUrl}" alt="Foto">
             <button class="delete-btn" onclick="eliminarFoto('${foto.name}')">🗑️</button>
           `;
-          grid.appendChild(card);
-        }
-
-        grupoDiv.appendChild(grid);
-        preview.appendChild(grupoDiv);
-      }
-    }
-
-    async function eliminarFoto(nombre) {
-      if (confirm("¿Seguro que quieres eliminar
+          grid.appendChild(card
