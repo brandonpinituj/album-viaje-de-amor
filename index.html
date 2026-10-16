@@ -40,12 +40,26 @@
     .btn:hover {
       background: #c2185b;
     }
+    .mes-grupo {
+      margin-top: 40px;
+    }
+    .mes-titulo {
+      font-size: 1.3rem;
+      color: #c2185b;
+      margin-bottom: 15px;
+    }
     #preview {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 30px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    .photo-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
       gap: 15px;
-      max-width: 900px;
-      margin: 0 auto;
     }
     .photo-card {
       position: relative;
@@ -59,11 +73,20 @@
       height: 180px;
       object-fit: cover;
     }
-    .photo-info {
-      padding: 8px;
-      font-size: 0.9rem;
-      color: #6b3a4a;
-      background: white;
+    .delete-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: rgba(233,30,99,0.8);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 4px 8px;
+      cursor: pointer;
+      font-size: 0.8rem;
+    }
+    .delete-btn:hover {
+      background: #c2185b;
     }
     @keyframes aparecer {
       from { opacity: 0; transform: scale(0.9); }
@@ -102,7 +125,7 @@
     const hoy = new Date();
     const dias = Math.floor((hoy - fechaInicio) / (1000 * 60 * 60 * 24));
     const meses = Math.floor(dias / 30.44);
-    document.getElementById("contador").textContent = `Hoy cumplimos ${dias} días y ${meses} meses juntos 💞`;
+    document.getElementById("contador").textContent = `Hoy cumplimos ${dias} días ${meses} meses juntos 💞`;
 
     // 💗 Corazones flotando
     setInterval(() => {
@@ -159,15 +182,51 @@
         return;
       }
 
-      for (const foto of data) {
-        const { data: urlData } = client.storage.from(BUCKET).getPublicUrl(foto.name);
-        const card = document.createElement("div");
-        card.className = "photo-card";
-        card.innerHTML = `
-          <img src="${urlData.publicUrl}" alt="Foto">
-          <div class="photo-info">${foto.name}</div>
-        `;
-        preview.appendChild(card);
+      // Ignorar archivos vacíos o de sistema
+      const archivosValidos = (data || []).filter(item => item.name !== ".emptyFolderPlaceholder");
+
+      // Agrupar fotos por mes
+      const gruposPorMes = {};
+      for (const foto of archivosValidos) {
+        const fecha = new Date(foto.created_at);
+        const mes = fecha.toLocaleString("es-ES", { month: "long", year: "numeric" });
+        if (!gruposPorMes[mes]) gruposPorMes[mes] = [];
+        gruposPorMes[mes].push(foto);
+      }
+
+      // Mostrar grupos
+      for (const mes in gruposPorMes) {
+        const grupoDiv = document.createElement("div");
+        grupoDiv.className = "mes-grupo";
+        grupoDiv.innerHTML = `<div class="mes-titulo">📅 ${mes}</div>`;
+
+        const grid = document.createElement("div");
+        grid.className = "photo-grid";
+
+        for (const foto of gruposPorMes[mes]) {
+          const { data: urlData } = client.storage.from(BUCKET).getPublicUrl(foto.name);
+          const card = document.createElement("div");
+          card.className = "photo-card";
+          card.innerHTML = `
+            <img src="${urlData.publicUrl}" alt="Foto">
+            <button class="delete-btn" onclick="eliminarFoto('${foto.name}')">🗑️</button>
+          `;
+          grid.appendChild(card);
+        }
+
+        grupoDiv.appendChild(grid);
+        preview.appendChild(grupoDiv);
+      }
+    }
+
+    async function eliminarFoto(nombre) {
+      if (confirm("¿Seguro que quieres eliminar esta foto?")) {
+        const { error } = await client.storage.from(BUCKET).remove([nombre]);
+        if (error) {
+          alert("Error al eliminar: " + error.message);
+        } else {
+          mostrarFotos();
+        }
       }
     }
 
