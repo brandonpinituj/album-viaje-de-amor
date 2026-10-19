@@ -44,8 +44,9 @@
     </div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script>
+  <script> <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  
+<script>
     const supabaseUrl = "https://dummqfcymsyvopktgyqu.supabase.co"; // correcto: .co
     const supabaseKey = "sb_publishable_51lhdrJqsmEhCih3yqbqmw_dvxFkjjU";
     const client = window.supabase.createClient(supabaseUrl, supabaseKey);
@@ -93,7 +94,7 @@
       mostrarFotos();
       fileInput.value = ""; dateInput.value = "";
     });
-
+</script>
     // Mostrar fotos
     async function mostrarFotos() {
       preview.innerHTML = "";
