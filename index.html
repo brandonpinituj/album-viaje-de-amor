@@ -22,7 +22,6 @@
 </head>
 <body>
   <h1>💖 Un viaje de amor 💖</h1>
-  <!-- Contador y notas románticas -->
   <div id="contador"></div>
   <div id="notas"></div>
 
@@ -35,7 +34,6 @@
 
   <div id="preview"></div>
 
-  <!-- Modal -->
   <div id="modal" class="modal">
     <span class="close">&times;</span>
     <img id="modalImg" src="">
@@ -63,7 +61,7 @@
     const saveDate = document.getElementById("saveDate");
     let currentFoto = null;
 
-    // 💞 Contador automático
+    // Contador
     const fechaInicio = new Date("2026-05-16");
     function actualizarContador() {
       const hoy = new Date();
@@ -74,7 +72,7 @@
     }
     actualizarContador();
 
-    // 💌 Notas románticas dinámicas
+    // Notas románticas
     const frases = [
       "💌 Cada foto es un recuerdo de nuestro amor 💌",
       "🌹 Gracias por cada momento juntos 🌹",
@@ -86,259 +84,6 @@
       document.getElementById("notas").innerHTML = `<p>${frases[i]}</p>`;
       i = (i + 1) % frases.length;
     }, 5000);
-
-    // Subida de fotos
-    uploadBtn.addEventListener("click", async () => {
-      const files = fileInput.files;
-      const fechaElegida = dateInput.value ? new Date(dateInput.value) : new Date();
-      if (!files.length) { status.textContent = "Selecciona al menos una foto 💡"; return; }
-      status.textContent = "Subiendo fotos...";
-
-      for (const file of files) {
-        const fechaStr = fechaElegida.toISOString().split("T")[0];
-        const fileName = `${fechaStr}-${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g,"_")}`;
-        const { error: uploadError } = await client.storage.from(BUCKET).upload(fileName, file);
-        if (uploadError) { console.error(uploadError); status.textContent = "Error al subir archivo"; return; }
-        const { data: urlData } = client.storage.from(BUCKET).getPublicUrl(fileName);
-        const { error: insertError } = await client.from("album").insert({ url: urlData.publicUrl, fecha: fechaStr });
-        if (insertError) { console.error(insertError); status.textContent = "Error al guardar en tabla"; return; }
-      }
-      status.textContent = "Fotos subidas con éxito 💖";
-      mostrarFotos();
-      fileInput.value = ""; dateInput.value = "";
-    });
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script>
-    const supabaseUrl = "https://dummqfcymsyvopktgyqu.supabase.co";
-    const supabaseKey = "sb_publishable_51lhdrJqsmEhCih3yqbqmw_dvxFkjjU";
-    const client = window.supabase.createClient(supabaseUrl, supabaseKey);
-    const BUCKET = "FOTOS";
-
-    const fileInput = document.getElementById("fileInput");
-    const dateInput = document.getElementById("dateInput");
-    const uploadBtn = document.getElementById("uploadBtn");
-    const status = document.getElementById("status");
-    const preview = document.getElementById("preview");
-
-    const modal = document.getElementById("modal");
-    const modalImg = document.getElementById("modalImg");
-    const editDate = document.getElementById("editDate");
-    const saveDate = document.getElementById("saveDate");
-    let currentFoto = null;
-
-    // 💞 Contador automático
-    const fechaInicio = new Date("2026-05-16");
-    function actualizarContador() {
-      const hoy = new Date();
-      const dias = Math.floor((hoy - fechaInicio) / (1000 * 60 * 60 * 24));
-      const meses = Math.floor(dias / 30.44);
-      document.getElementById("contador").textContent =
-        `Hoy cumplimos ${dias} días y ${meses} meses juntos 💞`;
-    }
-    actualizarContador();
-
-    // 💌 Notas románticas dinámicas
-    const frases = [
-      "💌 Cada foto es un recuerdo de nuestro amor 💌",
-      "🌹 Gracias por cada momento juntos 🌹",
-      "✨ Nuestro viaje apenas comienza ✨",
-      "💕 Eres mi razón de sonreír 💕"
-    ];
-    let i = 0;
-    setInterval(() => {
-      document.getElementById("notas").innerHTML = `<p>${frases[i]}</p>`;
-      i = (i + 1) % frases.length;
-    }, 5000);
-
-    // Subida de fotos
-    uploadBtn.addEventListener("click", async () => {
-      const files = fileInput.files;
-      const fechaElegida = dateInput.value ? new Date(dateInput.value) : new Date();
-      if (!files.length) { status.textContent = "Selecciona al menos una foto 💡"; return; }
-      status.textContent = "Subiendo fotos...";
-
-      for (const file of files) {
-        const fechaStr = fechaElegida.toISOString().split("T")[0];
-        const fileName = `${fechaStr}-${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g,"_")}`;
-        const { error: uploadError } = await client.storage.from(BUCKET).upload(fileName, file);
-        if (uploadError) { console.error(uploadError); status.textContent = "Error al subir archivo"; return; }
-        const { data: urlData } = client.storage.from(BUCKET).getPublicUrl(fileName);
-        const { error: insertError } = await client.from("album").insert({ url: urlData.publicUrl, fecha: fechaStr });
-        if (insertError) { console.error(insertError); status.textContent = "Error al guardar en tabla"; return; }
-      }
-      status.textContent = "Fotos subidas con éxito 💖";
-      mostrarFotos();
-      fileInput.value = ""; dateInput.value = "";
-    });
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script>
-    const supabaseUrl = "https://dummqfcymsyvopktgyqu.supabase.co";
-    const supabaseKey = "sb_publishable_51lhdrJqsmEhCih3yqbqmw_dvxFkjjU";
-    const client = window.supabase.createClient(supabaseUrl, supabaseKey);
-    const BUCKET = "FOTOS";
-
-    const fileInput = document.getElementById("fileInput");
-    const dateInput = document.getElementById("dateInput");
-    const uploadBtn = document.getElementById("uploadBtn");
-    const status = document.getElementById("status");
-    const preview = document.getElementById("preview");
-
-    const modal = document.getElementById("modal");
-    const modalImg = document.getElementById("modalImg");
-    const editDate = document.getElementById("editDate");
-    const saveDate = document.getElementById("saveDate");
-    let currentFoto = null;
-
-    // 💞 Contador automático
-    const fechaInicio = new Date("2026-05-16");
-    function actualizarContador() {
-      const hoy = new Date();
-      const dias = Math.floor((hoy - fechaInicio) / (1000 * 60 * 60 * 24));
-      const meses = Math.floor(dias / 30.44);
-      document.getElementById("contador").textContent =
-        `Hoy cumplimos ${dias} días y ${meses} meses juntos 💞`;
-    }
-    actualizarContador();
-
-    // 💌 Notas románticas dinámicas
-    const frases = [
-      "💌 Cada foto es un recuerdo de nuestro amor 💌",
-      "🌹 Gracias por cada momento juntos 🌹",
-      "✨ Nuestro viaje apenas comienza ✨",
-      "💕 Eres mi razón de sonreír 💕"
-    ];
-    let i = 0;
-    setInterval(() => {
-      document.getElementById("notas").innerHTML = `<p>${frases[i]}</p>`;
-      i = (i + 1) % frases.length;
-    }, 5000);
-
-    // Subida de fotos
-    uploadBtn.addEventListener("click", async () => {
-      const files = fileInput.files;
-      const fechaElegida = dateInput.value ? new Date(dateInput.value) : new Date();
-      if (!files.length) { status.textContent = "Selecciona al menos una foto 💡"; return; }
-      status.textContent = "Subiendo fotos...";
-
-      for (const file of files) {
-        const fechaStr = fechaElegida.toISOString().split("T")[0];
-        const fileName = `${fechaStr}-${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g,"_")}`;
-        const { error: uploadError } = await client.storage.from(BUCKET).upload(fileName, file);
-        if (uploadError) { console.error(uploadError); status.textContent = "Error al subir archivo"; return; }
-        const { data: urlData } = client.storage.from(BUCKET).getPublicUrl(fileName);
-        const { error: insertError } = await client.from("album").insert({ url: urlData.publicUrl, fecha: fechaStr });
-        if (insertError) { console.error(insertError); status.textContent = "Error al guardar en tabla"; return; }
-      }
-      status.textContent = "Fotos subidas con éxito 💖";
-      mostrarFotos();
-      fileInput.value = ""; dateInput.value = "";
-    });
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script>
-    const supabaseUrl = "https://dummqfcymsyvopktgyqu.supabase.co";
-    const supabaseKey = "sb_publishable_51lhdrJqsmEhCih3yqbqmw_dvxFkjjU";
-    const client = window.supabase.createClient(supabaseUrl, supabaseKey);
-    const BUCKET = "FOTOS";
-
-    const fileInput = document.getElementById("fileInput");
-    const dateInput = document.getElementById("dateInput");
-    const uploadBtn = document.getElementById("uploadBtn");
-    const status = document.getElementById("status");
-    const preview = document.getElementById("preview");
-
-    const modal = document.getElementById("modal");
-    const modalImg = document.getElementById("modalImg");
-    const editDate = document.getElementById("editDate");
-    const saveDate = document.getElementById("saveDate");
-    let currentFoto = null;
-
-    // 💞 Contador automático
-    const fechaInicio = new Date("2026-05-16");
-    function actualizarContador() {
-      const hoy = new Date();
-      const dias = Math.floor((hoy - fechaInicio) / (1000 * 60 * 60 * 24));
-      const meses = Math.floor(dias / 30.44);
-      document.getElementById("contador").textContent =
-        `Hoy cumplimos ${dias} días y ${meses} meses juntos 💞`;
-    }
-    actualizarContador();
-
-    // 💌 Notas románticas dinámicas
-    const frases = [
-      "💌 Cada foto es un recuerdo de nuestro amor 💌",
-      "🌹 Gracias por cada momento juntos 🌹",
-      "✨ Nuestro viaje apenas comienza ✨",
-      "💕 Eres mi razón de sonreír 💕"
-    ];
-    let i = 0;
-    setInterval(() => {
-      document.getElementById("notas").innerHTML = `<p>${frases[i]}</p>`;
-      i = (i + 1) % frases.length;
-    }, 5000);
-
-    // Subida de fotos
-    uploadBtn.addEventListener("click", async () => {
-      const files = fileInput.files;
-      const fechaElegida = dateInput.value ? new Date(dateInput.value) : new Date();
-      if (!files.length) { status.textContent = "Selecciona al menos una foto 💡"; return; }
-      status.textContent = "Subiendo fotos...";
-
-      for (const file of files) {
-        const fechaStr = fechaElegida.toISOString().split("T")[0];
-        const fileName = `${fechaStr}-${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g,"_")}`;
-        const { error: uploadError } = await client.storage.from(BUCKET).upload(fileName, file);
-        if (uploadError) { console.error(uploadError); status.textContent = "Error al subir archivo"; return; }
-        const { data: urlData } = client.storage.from(BUCKET).getPublicUrl(fileName);
-        const { error: insertError } = await client.from("album").insert({ url: urlData.publicUrl, fecha: fechaStr });
-        if (insertError) { console.error(insertError); status.textContent = "Error al guardar en tabla"; return; }
-      }
-      status.textContent = "Fotos subidas con éxito 💖";
-      mostrarFotos();
-      fileInput.value = ""; dateInput.value = "";
-    });
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script>
-    const supabaseUrl = "https://dummqfcymsyvopktgyqu.supabase.co";
-    const supabaseKey = "sb_publishable_51lhdrJqsmEhCih3yqbqmw_dvxFkjjU";
-    const client = window.supabase.createClient(supabaseUrl, supabaseKey);
-    const BUCKET = "FOTOS";
-
-    const fileInput = document.getElementById("fileInput");
-    const dateInput = document.getElementById("dateInput");
-    const uploadBtn = document.getElementById("uploadBtn");
-    const status = document.getElementById("status");
-    const preview = document.getElementById("preview");
-
-    const modal = document.getElementById("modal");
-    const modalImg = document.getElementById("modalImg");
-    const editDate = document.getElementById("editDate");
-    const saveDate = document.getElementById("saveDate");
-    let currentFoto = null;
-
-    // 💞 Contador automático
-    const fechaInicio = new Date("2026-05-16");
-    function actualizarContador() {
-      const hoy = new Date();
-      const dias = Math.floor((hoy - fechaInicio) / (1000 * 60 * 60 * 24));
-      const meses = Math.floor(dias / 30.44);
-      document.getElementById("contador").textContent =
-        `Hoy cumplimos ${dias} días y ${meses} meses juntos 💞`;
-    }
-    actualizarContador();
-
-    // 💌 Notas románticas dinámicas
-    const frases = [
-      "💌 Cada foto es un recuerdo de nuestro amor 💌",
-      "🌹 Gracias por cada momento juntos 🌹",
-      "✨ Nuestro viaje apenas comienza ✨",
-      "💕 Eres mi razón de sonreír 💕"
-    ];
-    let i = 0;
-    setInterval(() => {
-      document.getElementById("notas").innerHTML = `<p>${frases[i]}</p>`;
-      i = (i + 1) % frases.length;
-    }, 5000);
-
     // Subida de fotos
     uploadBtn.addEventListener("click", async () => {
       const files = fileInput.files;
@@ -420,11 +165,6 @@
     saveDate.addEventListener("click", async () => {
       if (currentFoto) {
         const { error } = await client.from("album").update({ fecha: editDate.value }).eq("id", currentFoto.id);
-        if (
-              // Guardar fecha editada
-    saveDate.addEventListener("click", async () => {
-      if (currentFoto) {
-        const { error } = await client.from("album").update({ fecha: editDate.value }).eq("id", currentFoto.id);
         if (error) {
           console.error(error);
           alert("Error al actualizar fecha");
@@ -435,11 +175,11 @@
         mostrarFotos();
       }
     });
-
     // Cerrar modal
     document.querySelector(".close").addEventListener("click", () => {
       modal.style.display = "none";
     });
+
     // Corazones flotando
     setInterval(() => {
       const c = document.createElement("div");
