@@ -13,7 +13,7 @@
     .photo-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; }
     .photo-card img {
       width: 100%;
-      height: auto;          /* altura automática */
+      height: auto;
       object-fit: contain;   /* muestra la imagen completa */
       border-radius: 8px;
       cursor: pointer;
@@ -72,10 +72,13 @@
 
     // 💞 Contador automático de días y meses
     const fechaInicio = new Date("2026-05-16"); // ajusta a tu aniversario
-    const hoy = new Date();
-    const dias = Math.floor((hoy - fechaInicio) / (1000 * 60 * 60 * 24));
-    const meses = Math.floor(dias / 30.44);
-    document.getElementById("contador").textContent = `Hoy cumplimos ${dias} días y ${meses} meses juntos 💞`;
+    function actualizarContador() {
+      const hoy = new Date();
+      const dias = Math.floor((hoy - fechaInicio) / (1000 * 60 * 60 * 24));
+      const meses = Math.floor(dias / 30.44);
+      document.getElementById("contador").textContent = `Hoy cumplimos ${dias} días y ${meses} meses juntos 💞`;
+    }
+    actualizarContador();
 
     // Subida de fotos
     uploadBtn.addEventListener("click", async () => {
@@ -143,7 +146,7 @@
                 await client.storage.from(BUCKET).remove([path]);
                 mostrarFotos();
               }
-            }, 1200); // 1.2 segundos presionado
+            }, 1200);
           });
           img.addEventListener("mouseup", () => clearTimeout(pressTimer));
           img.addEventListener("mouseleave", () => clearTimeout(pressTimer));
@@ -175,4 +178,4 @@
     setInterval(() => {
       const c = document.createElement("div");
       c.className = "corazon";
-      c.textContent = "💗
+      c.textContent
