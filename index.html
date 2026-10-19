@@ -6,22 +6,22 @@
   <style>
     body { font-family: 'Poppins', sans-serif; background: #fff0f5; text-align: center; }
     h1 { color: #c2185b; }
-    #contador { margin-bottom: 20px; color: #c2185b; font-weight: bold; }
     .upload-box { background: white; padding: 20px; border-radius: 12px; margin: 0 auto 20px; max-width: 400px; }
     .btn { background: #e91e63; color: white; border: none; padding: 10px 20px; border-radius: 20px; cursor: pointer; }
     .btn:hover { background: #c2185b; }
     .photo-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; }
-    .photo-card img { width: 100%; height: auto; object-fit: contain; border-radius: 8px; cursor: pointer; background:#000; }
+    .photo-card img { width: 100%; height: 150px; object-fit: cover; border-radius: 8px; cursor: pointer; }
+    /* Modal */
     .modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); justify-content:center; align-items:center; }
     .modal img { max-width:90%; max-height:80%; border-radius:12px; }
     .modal .close { position:absolute; top:20px; right:30px; font-size:30px; color:white; cursor:pointer; }
+    /* Corazones flotando */
     .corazon { position:fixed; bottom:0; font-size:1.5rem; color:#e91e63; animation:flotar 6s linear; pointer-events:none; }
     @keyframes flotar { 0%{transform:translateY(0);opacity:1;} 100%{transform:translateY(-100vh);opacity:0;} }
   </style>
 </head>
 <body>
   <h1>💖 Un viaje de amor 💖</h1>
-  <div id="contador"></div>
 
   <div class="upload-box">
     <input type="file" id="fileInput" accept="image/*" multiple>
@@ -32,6 +32,7 @@
 
   <div id="preview"></div>
 
+  <!-- Modal -->
   <div id="modal" class="modal">
     <span class="close">&times;</span>
     <img id="modalImg" src="">
@@ -53,79 +54,44 @@
     const uploadBtn = document.getElementById("uploadBtn");
     const status = document.getElementById("status");
     const preview = document.getElementById("preview");
+
     const modal = document.getElementById("modal");
     const modalImg = document.getElementById("modalImg");
     const editDate = document.getElementById("editDate");
     const saveDate = document.getElementById("saveDate");
     let currentFoto = null;
 
-    // 💞 Contador automático
-    const fechaInicio = new Date("2026-05-16");
-    function actualizarContador() {
-      const hoy = new Date();
-      const dias = Math.floor((hoy - fechaInicio) / (1000 * 60 * 60 * 24));
-      const meses = Math.floor(dias / 30.44);
-      document.getElementById("contador").textContent =
-        `Hoy cumplimos ${dias} días y ${meses} meses juntos 💞`;
-    }
-    actualizarContador();
-
-    // 💗 Corazones flotando
-    setInterval(() => {
-      const c = document.createElement("div");
-      c.className = "corazon";
-      c.textContent = "💗";
-      c.style.left = Math.random() * 100 + "vw";
-      document.body.appendChild(c);
-      setTimeout(() => c.remove(), 6000);
-    }, 800);
-
-    // 📸 Subida de fotos
+    // Subida de fotos
     uploadBtn.addEventListener("click", async () => {
       const files = fileInput.files;
       const fechaElegida = dateInput.value ? new Date(dateInput.value) : new Date();
-      if (!files.length) {
-        status.textContent = "Selecciona al menos una foto 💡";
-        return;
-      }
+      if (!files.length) { status.textContent = "Selecciona al menos una foto 💡"; return; }
       status.textContent = "Subiendo fotos...";
 
       for (const file of files) {
         const fechaStr = fechaElegida.toISOString().split("T")[0];
-        const fileName = `${fechaStr}-${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, "_")}`;
+        const fileName = `${fechaStr}-${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g,"_")}`;
         const { error: uploadError } = await client.storage.from(BUCKET).upload(fileName, file);
-        if (uploadError) {
-          console.error(uploadError);
-          status.textContent = "Error al subir archivo";
-          return;
-        }
+        if (uploadError) { console.error(uploadError); status.textContent = "Error al subir archivo"; return; }
         const { data: urlData } = client.storage.from(BUCKET).getPublicUrl(fileName);
-        const { error: insertError } = await client.from("album").insert({
-          url: urlData.publicUrl,
-          fecha: fechaStr
-        });
-        if (insertError) {
-          console.error(insertError);
-          status.textContent = "Error al guardar en tabla";
-          return;
-        }
+        const { error: insertError } = await client.from("album").insert({ url: urlData.publicUrl, fecha: fechaStr });
+        if (insertError) { console.error(insertError); status.textContent = "Error al guardar en tabla"; return; }
       }
       status.textContent = "Fotos subidas con éxito 💖";
       mostrarFotos();
-      fileInput.value = "";
-      dateInput.value = "";
+      fileInput.value = ""; dateInput.value = "";
     });
 
-    // 🖼️ Mostrar fotos agrupadas por mes
+    // Mostrar fotos
     async function mostrarFotos() {
       preview.innerHTML = "";
-      const { data, error } = await client.from("album").select("id, url, fecha").order("id", { ascending: false });
+      const { data, error } = await client.from("album").select("id, url, fecha").order("id",{ascending:false});
       if (error) { console.error(error); return; }
 
       const gruposPorMes = {};
       for (const foto of data) {
         const fecha = new Date(foto.fecha);
-        const mes = fecha.toLocaleString("es-ES", { month: "long", year: "numeric" });
+        const mes = fecha.toLocaleString("es-ES",{month:"long",year:"numeric"});
         if (!gruposPorMes[mes]) gruposPorMes[mes] = [];
         gruposPorMes[mes].push(foto);
       }
@@ -143,6 +109,7 @@
           img.src = foto.url;
           img.alt = "Foto";
 
+          // Abrir modal al tocar
           img.addEventListener("click", () => {
             modal.style.display = "flex";
             modalImg.src = foto.url;
@@ -150,6 +117,7 @@
             currentFoto = foto;
           });
 
+          // Long press para eliminar
           let pressTimer;
           img.addEventListener("mousedown", () => {
             pressTimer = setTimeout(async () => {
@@ -159,7 +127,7 @@
                 await client.storage.from(BUCKET).remove([path]);
                 mostrarFotos();
               }
-            }, 1200);
+            }, 1200); // 1.2 segundos presionado
           });
           img.addEventListener("mouseup", () => clearTimeout(pressTimer));
           img.addEventListener("mouseleave", () => clearTimeout(pressTimer));
@@ -173,20 +141,31 @@
       }
     }
 
-    // ✏️ Guardar fecha editada
+    // Guardar fecha editada
     saveDate.addEventListener("click", async () => {
       if (currentFoto) {
         const { error } = await client.from("album").update({ fecha: editDate.value }).eq("id", currentFoto.id);
-        if (error) {
-          console.error(error);
-          alert("Error al actualizar fecha");
-          return;
-        }
+        if (error) { console.error(error); alert("Error al actualizar fecha"); return; }
         alert("Fecha actualizada 💖");
         modal.style.display = "none";
         mostrarFotos();
       }
     });
 
-    // ❌ Cerrar modal
-    document.querySelector(".close").addEventListener("click", () =>
+    // Cerrar modal
+    document.querySelector(".close").addEventListener("click", () => modal.style.display = "none");
+
+    // Corazones flotando
+    setInterval(() => {
+      const c = document.createElement("div");
+      c.className = "corazon";
+      c.textContent = "💗";
+      c.style.left = Math.random()*100 + "vw";
+      document.body.appendChild(c);
+      setTimeout(() => c.remove(), 6000);
+    }, 800);
+
+    mostrarFotos();
+  </script>
+</body>
+</html>
