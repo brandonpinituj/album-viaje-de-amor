@@ -46,7 +46,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    const supabaseUrl = "https://dummqfcymsyvopktgyqu.supabase.co";
+    const supabaseUrl = "https://dummqfcymsyvopktgyqu.supabase.co"; // correcto: .co
     const supabaseKey = "sb_publishable_51lhdrJqsmEhCih3yqbqmw_dvxFkjjU";
     const client = window.supabase.createClient(supabaseUrl, supabaseKey);
     const BUCKET = "FOTOS";
@@ -170,8 +170,3 @@
     // Corazones flotando
     setInterval(() => {
       const c = document.createElement("div");
-      c.className = "corazon";
-      c.textContent = "💗";
-      c.style.left = Math.random()*100 + "vw";
-      document.body.appendChild(c);
-      setTimeout
