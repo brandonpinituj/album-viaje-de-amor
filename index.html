@@ -152,7 +152,8 @@
 
       const gruposPorMes = {};
       for (const foto of data) {
-        const fecha = new Date(foto.fecha);
+        const [year, month, day] = foto.fecha.split("-");
+        const fecha = new Date(year, month - 1, day);
         const mes = fecha.toLocaleString("es-ES",{month:"long",year:"numeric"});
         if (!gruposPorMes[mes]) gruposPorMes[mes] = [];
         gruposPorMes[mes].push(foto);
