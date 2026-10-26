@@ -175,7 +175,7 @@
     // Mostrar fotos
     async function mostrarFotos() {
       preview.innerHTML = "";
-      const { data, error } = await client.from("album").select("id, url, fecha").order("id",{ascending:false});
+      const { data, error } = await client.from("album").select("id, url, fecha, descripcion").order("id",{ascending:false});
       if (error) { console.error(error); return; }
 
       const gruposPorMes = {};
@@ -183,13 +183,24 @@
         const [year, month, day] = foto.fecha.split("-");
         const fecha = new Date(year, month - 1, day);
         const mes = fecha.toLocaleString("es-ES",{month:"long",year:"numeric"});
+        const fechaCompleta = foto.fecha;
         if (!gruposPorMes[mes]) gruposPorMes[mes] = [];
         gruposPorMes[mes].push(foto);
       }
 
       for (const mes in gruposPorMes) {
         const grupoDiv = document.createElement("div");
-        grupoDiv.innerHTML = `<h3>📅 ${mes}</h3>`;
+        grupoDiv.innerHTML =
+        `
+        <h3>📅 ${foto.fecha}</h3>
+        <p style="
+        color:#c2185b;
+        font-style:italic;
+        margin-top:-10px;
+        margin-bottom:15px;">
+        💌 ${foto.descripcion || ""}
+        </p>
+        `;
         const grid = document.createElement("div");
         grid.className = "photo-grid";
 
