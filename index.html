@@ -119,7 +119,7 @@
   const fechaStr =
     dateInput.value ||
     new Date().toISOString().split("T")[0];
-
+      alert("Fecha seleccionada: " + fechaStr);
   if (!files.length) {
     status.textContent = "Selecciona al menos una foto 💡";
     return;
