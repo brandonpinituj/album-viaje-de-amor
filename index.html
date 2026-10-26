@@ -86,24 +86,64 @@
     }, 5000);
     // Subida de fotos
     uploadBtn.addEventListener("click", async () => {
-      const files = fileInput.files;
-      const fechaElegida = dateInput.value ? new Date(dateInput.value) : new Date();
-      if (!files.length) { status.textContent = "Selecciona al menos una foto 💡"; return; }
-      status.textContent = "Subiendo fotos...";
+       const files = fileInput.files;
 
-      for (const file of files) {
-        const fechaStr = fechaElegida.toISOString().split("T")[0];
-        const fileName = `${fechaStr}-${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g,"_")}`;
-        const { error: uploadError } = await client.storage.from(BUCKET).upload(fileName, file);
-        if (uploadError) { console.error(uploadError); status.textContent = "Error al subir archivo"; return; }
-        const { data: urlData } = client.storage.from(BUCKET).getPublicUrl(fileName);
-        const { error: insertError } = await client.from("album").insert({ url: urlData.publicUrl, fecha: fechaStr });
-        if (insertError) { console.error(insertError); status.textContent = "Error al guardar en tabla"; return; }
-      }
-      status.textContent = "Fotos subidas con éxito 💖";
-      mostrarFotos();
-      fileInput.value = ""; dateInput.value = "";
-    });
+  const fechaStr =
+    dateInput.value ||
+    new Date().toISOString().split("T")[0];
+
+  if (!files.length) {
+    status.textContent = "Selecciona al menos una foto 💡";
+    return;
+  }
+
+  status.textContent = "Subiendo fotos...";
+
+  for (const file of files) {
+
+    const fileName =
+      `${fechaStr}-${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g,"_")}`;
+
+    const { error: uploadError } =
+      await client.storage
+      .from(BUCKET)
+      .upload(fileName, file);
+
+    if (uploadError) {
+      console.error(uploadError);
+      status.textContent = "Error al subir archivo";
+      return;
+    }
+
+    const { data: urlData } =
+      client.storage
+      .from(BUCKET)
+      .getPublicUrl(fileName);
+
+    const { error: insertError } =
+      await client
+      .from("album")
+      .insert({
+        url: urlData.publicUrl,
+        fecha: fechaStr
+      });
+
+    if (insertError) {
+      console.error(insertError);
+      status.textContent =
+        "Error al guardar en tabla";
+      return;
+    }
+  }
+
+  status.textContent =
+    "Fotos subidas con éxito 💖";
+
+  mostrarFotos();
+
+  fileInput.value = "";
+  dateInput.value = "";
+});
     // Mostrar fotos
     async function mostrarFotos() {
       preview.innerHTML = "";
