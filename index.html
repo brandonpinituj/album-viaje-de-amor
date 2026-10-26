@@ -41,6 +41,19 @@
   <div class="upload-box">
     <input type="file" id="fileInput" accept="image/*" multiple>
     <input type="date" id="dateInput">
+    <br><br>
+
+    <textarea
+    id="descripcionInput"
+    placeholder="Escribe un recuerdo especial..."
+    rows="3"
+    style="
+    width:100%;
+    padding:10px;
+    border-radius:10px;
+    border:1px solid #ddd;
+    resize:none;">
+    </textarea>
     <button class="btn" id="uploadBtn">Subir fotos</button>
     <div id="status"></div>
   </div>
@@ -64,6 +77,7 @@
 
     const fileInput = document.getElementById("fileInput");
     const dateInput = document.getElementById("dateInput");
+    const descripcionInput = document.getElementById("descripcionInput");
     const uploadBtn = document.getElementById("uploadBtn");
     const status = document.getElementById("status");
     const preview = document.getElementById("preview");
@@ -100,6 +114,7 @@
     // Subida de fotos
     uploadBtn.addEventListener("click", async () => {
        const files = fileInput.files;
+       const descripcion = descripcionInput.value;
 
   const fechaStr =
     dateInput.value ||
@@ -134,12 +149,11 @@
       .getPublicUrl(fileName);
 
     const { error: insertError } =
-      await client
-      .from("album")
-      .insert({
-        url: urlData.publicUrl,
-        fecha: fechaStr
-      });
+     await client.from("album").insert({
+  url: urlData.publicUrl,
+  fecha: fechaStr,
+  description: descripcion
+  });
 
     if (insertError) {
       console.error(insertError);
@@ -156,6 +170,7 @@
 
   fileInput.value = "";
   dateInput.value = "";
+  descripcionInput.value = "";
 });
     // Mostrar fotos
     async function mostrarFotos() {
