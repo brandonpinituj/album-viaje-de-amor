@@ -197,8 +197,7 @@ gruposPorFecha[fechaCompleta].push(foto);
 
     const [year, month, day] = fecha.split("-");
 
-    const descripcion =
-      gruposPorFecha[fecha][0].descripcion || "";
+    grupoDiv.innerHTML = `<h3>${day} de ${meses[month]} de ${year}</h3>`;
 
     const meses = {
       "01":"enero",
