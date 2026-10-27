@@ -192,39 +192,44 @@ gruposPorFecha[fechaCompleta].push(foto);
       }
 
      for (const fecha in gruposPorFecha) {
-        const grupoDiv = document.createElement("div");
-        grupoDiv.innerHTML = `<h3>${day} de ${meses[month]} de ${year}</h3>`;
-       const [year, month, day] = fecha.split("-");
-       const descripcion = gruposPorFecha[fecha][0].descripcion || "";
 
-const meses = {
-  "01":"enero",
-  "02":"febrero",
-  "03":"marzo",
-  "04":"abril",
-  "05":"mayo",
-  "06":"junio",
-  "07":"julio",
-  "08":"agosto",
-  "09":"septiembre",
-  "10":"octubre",
-  "11":"noviembre",
-  "12":"diciembre"
-};
+    const grupoDiv = document.createElement("div");
 
-grupoDiv.innerHTML = `<h3>${day} de ${meses[month]} de ${year}</h3>
-<p style="
-color:#c2185b;
-font-style:italic;
-font-size:16px;
-margin-top:-5px;
-margin-bottom:15px;
-">
-💌 ${descripcion}
-</p>
-`;
-        const grid = document.createElement("div");
-        grid.className = "photo-grid";
+    const [year, month, day] = fecha.split("-");
+
+    const descripcion =
+      gruposPorFecha[fecha][0].descripcion || "";
+
+    const meses = {
+      "01":"enero",
+      "02":"febrero",
+      "03":"marzo",
+      "04":"abril",
+      "05":"mayo",
+      "06":"junio",
+      "07":"julio",
+      "08":"agosto",
+      "09":"septiembre",
+      "10":"octubre",
+      "11":"noviembre",
+      "12":"diciembre"
+    };
+
+    grupoDiv.innerHTML = `
+      <h3>${day} de ${meses[month]} de ${year}</h3>
+
+      <p style="
+      color:#c2185b;
+      font-style:italic;
+      font-size:16px;
+      margin-top:-5px;
+      margin-bottom:15px;">
+      💌 ${descripcion}
+      </p>
+    `;
+
+    const grid = document.createElement("div");
+    grid.className = "photo-grid";
 
         for (const foto of gruposPorFecha[fecha]) {
           const card = document.createElement("div");
