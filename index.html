@@ -195,6 +195,26 @@ gruposPorFecha[fechaCompleta].push(foto);
      for (const fecha in gruposPorFecha) {
         const grupoDiv = document.createElement("div");
         grupoDiv.innerHTML =`<h3>📅 ${fecha}</h3>`;
+       const [year, month, day] = fecha.split("-");
+
+const meses = {
+  "01":"enero",
+  "02":"febrero",
+  "03":"marzo",
+  "04":"abril",
+  "05":"mayo",
+  "06":"junio",
+  "07":"julio",
+  "08":"agosto",
+  "09":"septiembre",
+  "10":"octubre",
+  "11":"noviembre",
+  "12":"diciembre"
+};
+
+grupoDiv.innerHTML = `
+<h3>📅 ${day} de ${meses[month]} de ${year}</h3>
+`;
         const grid = document.createElement("div");
         grid.className = "photo-grid";
 
