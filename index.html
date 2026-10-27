@@ -155,13 +155,12 @@
   descripcion: descripcion
   });
 
-    if (insertError) {
-      console.error(insertError);
-      status.textContent =
-        "Error al guardar en tabla";
-      return;
-    }
-  }
+   if (insertError) {
+  console.error(insertError);
+  alert(JSON.stringify(insertError));
+  status.textContent = "Error al guardar en tabla";
+  return;
+}
 
   status.textContent =
     "Fotos subidas con éxito 💖";
@@ -196,8 +195,7 @@ gruposPorFecha[fechaCompleta].push(foto);
         const grupoDiv = document.createElement("div");
         grupoDiv.innerHTML = `<h3>${day} de ${meses[month]} de ${year}</h3>`;
        const [year, month, day] = fecha.split("-");
-       const descripcion =
-      gruposPorFecha[fecha][0].descripcion || "";
+       const descripcion = gruposPorFecha[fecha][0].descripcion || "";
 
 const meses = {
   "01":"enero",
