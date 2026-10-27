@@ -183,21 +183,22 @@
 
       const gruposPorFecha = {};
       for (const foto of data) {
-        const [year, month, day] = foto.fecha.split("-");
-        const fecha = new Date(year, month - 1, day);
-        const mes = fecha.toLocaleString("es-ES",{month:"long",year:"numeric"});
         const fechaCompleta = foto.fecha;
-        if (!gruposPorFecha[Fecha]) gruposPorFecha[Fecha] = [];
-        gruposPorFecha[Fecha].push(foto);
+
+if (!gruposPorFecha[fechaCompleta]) {
+  gruposPorFecha[fechaCompleta] = [];
+}
+
+gruposPorFecha[fechaCompleta].push(foto);
       }
 
-      for (const mes in gruposPorFecha) {
+     for (const fecha in gruposPorFecha) {
         const grupoDiv = document.createElement("div");
-        grupoDiv.innerHTML =`<h3>📅 ${}Fecha}</h3>`;
+        grupoDiv.innerHTML =`<h3>📅 ${fecha}</h3>`;
         const grid = document.createElement("div");
         grid.className = "photo-grid";
 
-        for (const foto of gruposPorFecha[Fecha]) {
+        for (const foto of gruposPorFecha[fecha]) {
           const card = document.createElement("div");
           card.className = "photo-card";
           const img = document.createElement("img");
