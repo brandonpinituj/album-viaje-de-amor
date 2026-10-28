@@ -116,9 +116,6 @@
        const files = fileInput.files;
        const descripcion = descripcionInput.value;
 
-  const fechaStr =
-    dateInput.value ||
-    new Date().toISOString().split("T")[0];
       const fechaStr =
   dateInput.value ||
   new Date().toISOString().split("T")[0];
@@ -155,15 +152,16 @@
   url: urlData.publicUrl,
   fecha: fechaStr,
   descripcion: descripcion
-  });
+     
+  }); 
 
    if (insertError) {
   console.error(insertError);
   alert(JSON.stringify(insertError));
   status.textContent = "Error al guardar en tabla";
   return;
-}
-
+  }
+  }
   status.textContent =
     "Fotos subidas con éxito 💖";
 
