@@ -132,7 +132,7 @@
   for (const file of files) {
 
     const fileName =
-      `${fechaStr}-${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g,"_")}`;
+`${fechaStr}-${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g,"_")}`;
 
     const { error: uploadError } =
       await client.storage
