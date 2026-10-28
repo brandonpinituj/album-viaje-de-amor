@@ -222,15 +222,12 @@ gruposPorFecha[fechaCompleta].push(foto);
 
     for (const foto of gruposPorFecha[fecha]) {
 
-const grid = document.createElement("div");
-grid.className = "photo-grid";
+    const card = document.createElement("div");
+    card.className = "photo-card";
 
-        for (const foto of gruposPorFecha[fecha]) {
-          const card = document.createElement("div");
-          card.className = "photo-card";
-          const img = document.createElement("img");
-          img.src = foto.url;
-          img.alt = "Foto";
+    const img = document.createElement("img");
+    img.src = foto.url;
+    img.alt = "Foto";
 
           img.addEventListener("click", () => {
             modal.style.display = "flex";
