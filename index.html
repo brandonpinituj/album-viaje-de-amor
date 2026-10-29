@@ -307,22 +307,42 @@ deletePhotoBtn.addEventListener("click", async () => {
 
   if (!confirm("¿Eliminar esta foto?")) return;
 
-  const { error } = await client
-    .from("album")
-    .delete()
-    .eq("id", currentFoto.id);
+  try {
 
-  if (error) {
-    console.error(error);
-    alert("Error al eliminar foto");
-    return;
+    const nombreArchivo =
+      currentFoto.url.split("/").pop();
+
+    await client.storage
+      .from(BUCKET)
+      .remove([nombreArchivo]);
+
+    const { error } =
+      await client
+      .from("album")
+      .delete()
+      .eq("id", currentFoto.id);
+
+    if (error) {
+      console.error(error);
+      alert("Error al eliminar foto");
+      return;
+    }
+
+    modal.style.display = "none";
+
+    alert("Foto eliminada 💖");
+
+    mostrarFotos();
+
+  } catch(err) {
+
+    console.error(err);
+
+    alert("Error eliminando foto");
+
   }
 
-  modal.style.display = "none";
-
-  alert("Foto eliminada 💖");
-
-  mostrarFotos();
+});
 
 });
     // Cerrar modal
