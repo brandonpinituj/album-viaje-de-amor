@@ -74,9 +74,21 @@
     <span class="close">&times;</span>
     <img id="modalImg" src="">
     <div>
-      <input type="date" id="editDate">
-      <button class="btn" id="saveDate">Guardar fecha</button>
-    </div>
+  <input type="date" id="editDate">
+
+  <br><br>
+
+  <button class="btn" id="saveDate">
+    Guardar fecha
+  </button>
+
+  <button
+    class="btn"
+    id="deletePhotoBtn"
+    style="background:#d32f2f;">
+    🗑️ Eliminar foto
+  </button>
+</div>
   </div>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
@@ -95,6 +107,8 @@
     const modalImg = document.getElementById("modalImg");
     const editDate = document.getElementById("editDate");
     const saveDate = document.getElementById("saveDate");
+    const deletePhotoBtn =
+    document.getElementById("deletePhotoBtn");
     let currentFoto = null;
 
     // Contador
@@ -286,7 +300,31 @@ gruposPorFecha[fechaCompleta].push(foto);
         mostrarFotos();
       }
     });
+    // Eliminar foto
+deletePhotoBtn.addEventListener("click", async () => {
 
+  if (!currentFoto) return;
+
+  if (!confirm("¿Eliminar esta foto?")) return;
+
+  const { error } = await client
+    .from("album")
+    .delete()
+    .eq("id", currentFoto.id);
+
+  if (error) {
+    console.error(error);
+    alert("Error al eliminar foto");
+    return;
+  }
+
+  modal.style.display = "none";
+
+  alert("Foto eliminada 💖");
+
+  mostrarFotos();
+
+});
     // Cerrar modal
     document.querySelector(".close").addEventListener("click", () => {
       modal.style.display = "none";
