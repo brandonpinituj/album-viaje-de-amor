@@ -302,8 +302,14 @@ gruposPorFecha[fechaCompleta].push(foto);
     // Guardar fecha editada
     saveDate.addEventListener("click", async () => {
       if (currentFoto) {
-        const { error } = await client.from("album").update({fecha: editDate.value, descripcion: editDescripcion.value}).eq("id", currentFoto.id);
-        if (error) {
+       const { error } =
+  await client
+  .from("album")
+  .update({
+    fecha: editDate.value,
+    descripcion: editDescripcion.value
+  })
+  .eq("id", currentFoto.id);
           console.error(error);
           alert("Error al actualizar fecha");
           return;
