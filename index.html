@@ -75,7 +75,18 @@
     <img id="modalImg" src="">
     <div>
   <input type="date" id="editDate">
+<br><br>
 
+<textarea
+id="editDescripcion"
+rows="3"
+style="
+width:100%;
+padding:10px;
+border-radius:10px;
+border:1px solid #ddd;
+resize:none;">
+</textarea>
   <br><br>
 
   <button class="btn" id="saveDate">
@@ -106,6 +117,7 @@
     const modal = document.getElementById("modal");
     const modalImg = document.getElementById("modalImg");
     const editDate = document.getElementById("editDate");
+    const editDescripcion = document.getElementById("editDescripcion");
     const saveDate = document.getElementById("saveDate");
     const deletePhotoBtn =
     document.getElementById("deletePhotoBtn");
@@ -257,11 +269,12 @@ gruposPorFecha[fechaCompleta].push(foto);
     img.alt = "Foto";
 
           img.addEventListener("click", () => {
-            modal.style.display = "flex";
-            modalImg.src = foto.url;
-            editDate.value = foto.fecha;
-            currentFoto = foto;
-          });
+  modal.style.display = "flex";
+  modalImg.src = foto.url;
+  editDate.value = foto.fecha;
+  editDescripcion.value = foto.descripcion || "";
+  currentFoto = foto;
+});
 
           // Long press para eliminar
           let pressTimer;
@@ -289,7 +302,7 @@ gruposPorFecha[fechaCompleta].push(foto);
     // Guardar fecha editada
     saveDate.addEventListener("click", async () => {
       if (currentFoto) {
-        const { error } = await client.from("album").update({ fecha: editDate.value }).eq("id", currentFoto.id);
+        const { error } = await client.from("album").update({fecha: editDate.value, descripcion: editDescripcion.value}).eq("id", currentFoto.id);
         if (error) {
           console.error(error);
           alert("Error al actualizar fecha");
