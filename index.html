@@ -87,6 +87,14 @@
     resize:none;">
     </textarea>
     <button class="btn" id="uploadBtn">Subir fotos</button>
+    <br><br>
+
+<button
+  class="btn"
+  id="portadaBtn"
+  style="background:#ffb300;">
+  ⭐ Usar como portada
+</button>
     <div id="status"></div>
   </div>
 
@@ -140,8 +148,8 @@ resize:none;">
     const editDate = document.getElementById("editDate");
     const editDescripcion = document.getElementById("editDescripcion");
     const saveDate = document.getElementById("saveDate");
-    const deletePhotoBtn =
-    document.getElementById("deletePhotoBtn");
+    const deletePhotoBtn = document.getElementById("deletePhotoBtn");
+    const portadaBtn = document.getElementById("portadaBtn");
     let currentFoto = null;
 
     // Contador
@@ -394,7 +402,24 @@ deletePhotoBtn.addEventListener("click", async () => {
   }
 
 });
+    // Usar como portada
+portadaBtn.addEventListener("click", () => {
 
+  if (!currentFoto) return;
+
+  localStorage.setItem(
+    "fotoPortada",
+    currentFoto.url
+  );
+
+  document.getElementById("fotoPortada").src =
+    currentFoto.url;
+
+  alert("💖 Portada actualizada");
+
+  modal.style.display = "none";
+
+});
     // Cerrar modal
     document.querySelector(".close").addEventListener("click", () => {
       modal.style.display = "none";
@@ -409,7 +434,13 @@ deletePhotoBtn.addEventListener("click", async () => {
       document.body.appendChild(c);
       setTimeout(() => c.remove(), 6000);
     }, 800);
+const portadaGuardada =
+localStorage.getItem("fotoPortada");
 
+if (portadaGuardada) {
+  document.getElementById("fotoPortada").src =
+    portadaGuardada;
+}
     // Mostrar fotos al cargar
     mostrarFotos();
   </script>
