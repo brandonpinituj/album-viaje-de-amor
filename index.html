@@ -150,6 +150,7 @@ resize:none;">
     const saveDate = document.getElementById("saveDate");
     const deletePhotoBtn = document.getElementById("deletePhotoBtn");
     const portadaBtn = document.getElementById("portadaBtn");
+    const quitarPortadaBtn = document.getElementById("quitarPortadaBtn");
     let currentFoto = null;
 
     // Contador
@@ -404,6 +405,15 @@ deletePhotoBtn.addEventListener("click", async () => {
 });
     // Usar como portada
 portadaBtn.addEventListener("click", () => {
+quitarPortadaBtn.addEventListener("click", () => {
+
+  localStorage.removeItem("fotoPortada");
+
+  document.getElementById("fotoPortada").src = "";
+
+  alert("💖 Portada eliminada");
+
+});
 
   if (!currentFoto) return;
 
