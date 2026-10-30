@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es"> 
 <head>
   <meta charset="UTF-8">
   <title>Un viaje de amor</title>
@@ -267,13 +267,16 @@ gruposPorFecha[fechaCompleta].push(foto);
     img.src = foto.url;
     img.alt = "Foto";
 
-          img.addEventListener("click", () => {
-            modal.style.display = "flex";
-            modalImg.src = foto.url;
-            editDate.value = foto.fecha;
-            currentFoto = foto;
-          });
+         img.addEventListener("click", () => {
+  modal.style.display = "flex";
+  modalImg.src = foto.url;
+  editDate.value = foto.fecha;
 
+  editDescripcion.value =
+    foto.descripcion || "";
+
+  currentFoto = foto;
+});
           // Long press para eliminar
           let pressTimer;
           img.addEventListener("mousedown", () => {
