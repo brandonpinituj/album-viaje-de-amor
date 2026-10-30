@@ -1,24 +1,11 @@
 <!DOCTYPE html>
-<html lang="es"> 
+<html lang="es">
 <head>
   <meta charset="UTF-8">
   <title>Un viaje de amor</title>
   <style>
     body { font-family: 'Poppins', sans-serif; background: #fff0f5; text-align: center; }
-    h1 { color: #c2185b; } 
-    .portada{
-  max-width:800px;
-  margin:auto;
-  margin-bottom:30px;
-}
-
-#fotoPortada{
-  width:100%;
-  max-width:450px;
-  border-radius:20px;
-  box-shadow:0 4px 15px rgba(0,0,0,.15);
-  margin-bottom:15px;
-}
+    h1 { color: #c2185b; }
     #contador { margin-bottom: 10px; color: #c2185b; font-weight: bold; }
     #notas p { font-size: 1.2rem; color: #e91e63; margin: 10px 0; }
     .upload-box { background: white; padding: 20px; border-radius: 12px; margin: 0 auto 20px; max-width: 400px; }
@@ -57,18 +44,9 @@
   </style>
 </head>
 <body>
- <div class="portada">
-
-  <h1>💖 Nuestro Viaje de Amor 💖</h1>
-
-  <img
-    src="AQUI_VA_TU_FOTO_FAVORITA"
-    id="fotoPortada"
-  >
-
+  <h1>💖 Un viaje de amor 💖</h1>
   <div id="contador"></div>
   <div id="notas"></div>
-</div>
 
   <div class="upload-box">
     <input type="file" id="fileInput" accept="image/*" multiple>
@@ -87,14 +65,6 @@
     resize:none;">
     </textarea>
     <button class="btn" id="uploadBtn">Subir fotos</button>
-    <br><br>
-
-<button
-  class="btn"
-  id="portadaBtn"
-  style="background:#ffb300;">
-  ⭐ Usar como portada
-</button>
     <div id="status"></div>
   </div>
 
@@ -104,28 +74,18 @@
     <span class="close">&times;</span>
     <img id="modalImg" src="">
     <div>
-<input type="date" id="editDate">
+  <input type="date" id="editDate">
 
-<br><br>
+  <br><br>
 
-<textarea
-id="editDescripcion"
-rows="3"
-style="
-width:100%;
-padding:10px;
-border-radius:10px;
-border:1px solid #ddd;
-resize:none;">
-</textarea>
-
-<br><br>
-
-<button class="btn" id="saveDate">
+  <button class="btn" id="saveDate">
     Guardar fecha
   </button>
 
-  <button class="btn"  id="deletePhotoBtn" style="background:#d32f2f;">
+  <button
+    class="btn"
+    id="deletePhotoBtn"
+    style="background:#d32f2f;">
     🗑️ Eliminar foto
   </button>
 </div>
@@ -146,11 +106,9 @@ resize:none;">
     const modal = document.getElementById("modal");
     const modalImg = document.getElementById("modalImg");
     const editDate = document.getElementById("editDate");
-    const editDescripcion = document.getElementById("editDescripcion");
     const saveDate = document.getElementById("saveDate");
-    const deletePhotoBtn = document.getElementById("deletePhotoBtn");
-    const portadaBtn = document.getElementById("portadaBtn");
-    const quitarPortadaBtn = document.getElementById("quitarPortadaBtn");
+    const deletePhotoBtn =
+    document.getElementById("deletePhotoBtn");
     let currentFoto = null;
 
     // Contador
@@ -298,16 +256,13 @@ gruposPorFecha[fechaCompleta].push(foto);
     img.src = foto.url;
     img.alt = "Foto";
 
-         img.addEventListener("click", () => {
-  modal.style.display = "flex";
-  modalImg.src = foto.url;
-  editDate.value = foto.fecha;
+          img.addEventListener("click", () => {
+            modal.style.display = "flex";
+            modalImg.src = foto.url;
+            editDate.value = foto.fecha;
+            currentFoto = foto;
+          });
 
-  editDescripcion.value =
-    foto.descripcion || "";
-
-  currentFoto = foto;
-});
           // Long press para eliminar
           let pressTimer;
           img.addEventListener("mousedown", () => {
@@ -333,33 +288,18 @@ gruposPorFecha[fechaCompleta].push(foto);
     }
     // Guardar fecha editada
     saveDate.addEventListener("click", async () => {
-
-  if (currentFoto) {
-
-    const { error } =
-      await client
-      .from("album")
-      .update({
-        fecha: editDate.value,
-        descripcion: editDescripcion.value
-      })
-      .eq("id", currentFoto.id);
-
-    if (error) {
-      console.error(error);
-      alert("Error al actualizar");
-      return;
-    }
-
-    alert("Cambios guardados 💖");
-
-    modal.style.display = "none";
-
-    mostrarFotos();
-
-  }
-
-});
+      if (currentFoto) {
+        const { error } = await client.from("album").update({ fecha: editDate.value }).eq("id", currentFoto.id);
+        if (error) {
+          console.error(error);
+          alert("Error al actualizar fecha");
+          return;
+        }
+        alert("Fecha actualizada 💖");
+        modal.style.display = "none";
+        mostrarFotos();
+      }
+    });
     // Eliminar foto
 deletePhotoBtn.addEventListener("click", async () => {
 
@@ -403,33 +343,7 @@ deletePhotoBtn.addEventListener("click", async () => {
   }
 
 });
-    // Usar como portada
-portadaBtn.addEventListener("click", () => {
-quitarPortadaBtn.addEventListener("click", () => {
 
-  localStorage.removeItem("fotoPortada");
-
-  document.getElementById("fotoPortada").src = "";
-
-  alert("💖 Portada eliminada");
-
-});
-
-  if (!currentFoto) return;
-
-  localStorage.setItem(
-    "fotoPortada",
-    currentFoto.url
-  );
-
-  document.getElementById("fotoPortada").src =
-    currentFoto.url;
-
-  alert("💖 Portada actualizada");
-
-  modal.style.display = "none";
-
-});
     // Cerrar modal
     document.querySelector(".close").addEventListener("click", () => {
       modal.style.display = "none";
@@ -444,13 +358,7 @@ quitarPortadaBtn.addEventListener("click", () => {
       document.body.appendChild(c);
       setTimeout(() => c.remove(), 6000);
     }, 800);
-const portadaGuardada =
-localStorage.getItem("fotoPortada");
 
-if (portadaGuardada) {
-  document.getElementById("fotoPortada").src =
-    portadaGuardada;
-}
     // Mostrar fotos al cargar
     mostrarFotos();
   </script>
